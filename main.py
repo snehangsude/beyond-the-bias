@@ -47,8 +47,6 @@ for json_string in fc.process_feed(data):
         )
         ks.flush()
 
-sys.exit()
-
 
 processor = _flink_sink.FlinkProcessor(kafka_server, kafka_topic, jar_path=config.get('FLINK', 'jar_path'))
 data_stream = processor.create_data_stream()

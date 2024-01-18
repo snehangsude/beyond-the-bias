@@ -24,6 +24,7 @@ class PushKafkaEvents:
                 key=key if key else None,
                 value=avro_value if avro_value else None,
             )
+            print(f"SUCCESS: {key}: {avro_value}")
         except KafkaException as e:
             print(f'CRITICAL: During message production: {e}')
 
