@@ -1,0 +1,12 @@
+{
+  "type": "record",
+  "name": "RssNews",
+  "namespace": "com.example",
+  "fields": [
+    {"name": "title", "type": "string"},
+    {"name": "description", "type": "string"},
+    {"name": "link", "type": "string"},
+    {"name": "pubdate", "type": "string"},
+    {"name": "source", "type": "string"}
+  ]
+}
