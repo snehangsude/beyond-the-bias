@@ -1,30 +1,28 @@
-from typing import Callable
-from confluent_kafka import Producer
+import json
+from avro import schema
+from confluent_kafka.avro import AvroProducer
+from confluent_kafka.error import KafkaException
 
 
 class PushKafkaEvents:
 
-    def __init__(self, config:dict, delivery_callback:Callable=None):
-        self.producer = Producer(config)
-        self.delivery_callback = delivery_callback
+    def __init__(self, config:dict, value_schema:str, key_schema:str):
 
-    def delivery_report(self, err, msg):
-        
-        if self.delivery_callback:
-            self.delivery_callback(err, msg)
-        else:
-            if err:
-                print(f'ERROR: Message failed delivery: {err}')
-            else:
-                print(f"SUCCESS: Produced event to topic- {msg.topic()}: key = {msg.key().decode('utf-8')} value = {msg.value().decode('utf-8')}")  
+        self.avro_value_schema = schema.Parse(value_schema)
+        self.avro_key_schema = schema.Parse(key_schema)
+        self.producer = AvroProducer(
+            config, 
+            default_key_schema=self.avro_key_schema, 
+            default_value_schema=self.avro_value_schema
+        ) 
     
-    def produce_message(self, topic, key, value):
+    def produce_message(self, topic:str, key:dict, value:str):
         try:
+            avro_value = json.loads(value)
             self.producer.produce(
-                topic,
-                key=key.encode('utf-8') if key else None,
-                value=value.encode('utf-8') if value else None,
-                callback=self.delivery_report
+                topic=topic,
+                key=key if key else None,
+                value=avro_value if avro_value else None,
             )
         except KafkaException as e:
             print(f'CRITICAL: During message production: {e}')
