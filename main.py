@@ -11,6 +11,8 @@ config.read(f"{config_path[0]}/beyond-the-bias/config.ini")
 
 # Kafka Configurations
 kafka_server = dict(config["KAFKA"])
+kafka_server.pop("schema.registry.url")
+kafka_registry = config.get('KAFKA', 'schema.registry.url')
 kafka_topic = config.get('KAKFA_SCHEMA', 'topic')
 kafka_config = dict(config['KAFKA_ADDONS'])
 for key, value in kafka_config.items():
@@ -33,20 +35,20 @@ data = robot.fetch_feed()
 fc = rss.FeedCollector()
 ks = _kafka_stream.PushKafkaEvents(
         config=kafka_config, 
+        topic=kafka_topic,
+        registry_url=kafka_registry,
         value_schema=value_schema, 
         key_schema=key_schema
         )
-
 
 key_generator = {"time": str(datetime.datetime.now()), "publication": re.search(pattern, url).group(1)}
 for json_string in fc.process_feed(data):
         ks.produce_message(
                 topic=kafka_topic,
                 key=key_generator,
-                value=json_string
+                value=json_string.strip()
         )
         ks.flush()
-
 
 processor = _flink_sink.FlinkProcessor(kafka_server, kafka_topic, jar_path=config.get('FLINK', 'jar_path'))
 data_stream = processor.create_data_stream()
