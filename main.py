@@ -24,7 +24,7 @@ kafka_config.update(kafka_server)
 value_schema = config.get("KAKFA_SCHEMA", "rss_value_schema")
 key_schema = config.get("KAKFA_SCHEMA", "rss_key_schema")
 
-url = "https://rss.nytimes.com/services/xml/rss/nyt/World.xml"
+url = "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml"
 pattern = r"rss\.(.*?)\.com"
 
 # Scraping various news feeds
@@ -49,11 +49,9 @@ for json_string in fc.process_feed(data):
                 value=json_string.strip()
         )
         ks.flush()
+        # break
+
+# TODO 1: Push to new FILE
 
 processor = _flink_sink.FlinkProcessor(kafka_server, kafka_topic, jar_path=config.get('FLINK', 'jar_path'))
 data_stream = processor.create_data_stream()
-# print(data_stream)
-
-# kc = kafka_stream.ConsumeKafkaEvents(config_data, topic=kafka_topic)
-# kc.subscribe()
-# kc.poll_messages()
