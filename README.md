@@ -1,2 +1,2 @@
 # beyond-the-bias
-A news aggregator project
+A news aggregator project and more!
