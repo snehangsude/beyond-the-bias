@@ -35,7 +35,7 @@ class PushKafkaEvents:
                 key=str(key).encode("utf-8"),
                 value=serialized_value,
             )
-            print(f"SUCCESS: {str(key).encode('utf-8')}: {(str(value).encode('utf-8'))}\n")
+            print(f"SUCCESS: {str(key).encode('utf-8')}: {serialized_value}\n")
         except KafkaException as e:
             print(f'CRITICAL: During message production: {e}')
 

@@ -1,6 +1,6 @@
 import sys, os, datetime, re
 from configparser import ConfigParser
-from src import rss
+from src import parser
 from src import _kafka_stream
 from src import _flink_sink
 
@@ -28,11 +28,12 @@ url = "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml"
 pattern = r"rss\.(.*?)\.com"
 
 # Scraping various news feeds
-robot = rss.RSSFeedFetcher(feed_url=url)
+xml_parser = parser.XMLFeedParser()
+robot = parser.RSSFeedFetcher(feed_url=url, parser_type=xml_parser)
 data = robot.fetch_feed()
 
-# Collecting data from scraped feeds
-fc = rss.FeedCollector()
+# Collect data from scraped feeds
+fc = parser.FeedCollector()
 ks = _kafka_stream.PushKafkaEvents(
         config=kafka_config, 
         topic=kafka_topic,

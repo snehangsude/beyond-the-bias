@@ -1,20 +1,31 @@
-import requests, json
+import requests, json, bs4, typing
 import xml.etree.ElementTree as ET
+from abc import ABC, abstractmethod
+
+class FeedParser(ABC):
+    @abstractmethod
+    def parse(self, content: str) -> typing.Any:
+        pass
+
+class XMLFeedParser(FeedParser):
+    def parse(self, content: str) -> ET.Element:
+        return ET.fromstring(content)
+
+
+class HTMLFeedParser(FeedParser):
+    def parse(self, content: str) -> bs4.BeautifulSoup:
+        return bs4.BeautifulSoup(content, "html.parser")
 
 
 class RSSFeedFetcher:
 
-    def __init__(self, feed_url:str, parser:str = ET):
+    def __init__(self, feed_url:str, parser_type:str = FeedParser):
         self.feed_url = feed_url
-        self.parser = parser
+        self.parser = parser_type
 
     def fetch_feed(self):
         feed_content = requests.get(self.feed_url)
-        try:
-            parsed_feed = self.parser.parse(feed_content.text)
-        except OSError:
-            parsed_feed = self.parser.fromstring(feed_content.text)
-        return parsed_feed
+        return self.parser.parse(feed_content.text)
 
 class FeedCollector:
 

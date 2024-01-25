@@ -2,6 +2,7 @@ from pyflink.datastream import StreamExecutionEnvironment
 from pyflink.datastream.connectors import FlinkKafkaConsumer
 from pyflink.common.serialization import SimpleStringSchema
 from pyflink.common.typeinfo import Types
+from src import _textractor
 from pathlib import Path
 import json
 
@@ -32,9 +33,18 @@ class FlinkProcessor:
         try:
             json_data = json.loads(element[5:])
             link = json_data['link']
-            return link
+            link_content = self.extract_news_text(link)
+            json_data['content'] = link_content
+            return str(json_data)
         except Exception as e:
             print(f"CRITICAL: Error processing element: {element}, error: {str(e)}")
         
     def extract_news_text(self, links):
-        return
+        extractor = _textractor.TextExtractor()
+        text = extractor.extract_text_from_link(links)
+        extractor.close()
+        lines = [line for line in text.split('\n') if not line.isupper()]
+        final_text = '\n'.join(lines)
+        return final_text
+
+
